@@ -1,0 +1,24 @@
+[project]
+name = "human-tempo"
+version = "0.1.0"
+description = "Phone videos of a person putting a bowl on a plate, turned into physics-verified LIBERO-Goal demos for fine-tuning SmolVLA."
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# N (pep8-naming) stays off: frame names like T_table_cam are deliberate.
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "BLE", "ERA", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
