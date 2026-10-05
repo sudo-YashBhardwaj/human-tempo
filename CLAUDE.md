@@ -20,8 +20,8 @@ Phone videos of me putting a bowl on a plate become hundreds of physics-verified
 ## Workflow
 - Read the relevant existing code first. Extend it; don't duplicate it.
 - For anything non-trivial, state a 3-5 line plan before writing code.
+- Anything expected to take longer than ~10 minutes (generation, training, eval sweeps) runs detached through scripts/detach.sh <job> <command>, never as a foreground child of Claude: I work through a Cursor remote session that can disconnect. Follow progress in $HT_DATA/logs/<job>.log; stop a job with kill -- -$(cat $HT_DATA/logs/<job>.pid).
 - Done means: it ran, the output was shown, ruff and pytest pass, NOTES.md has a dated entry, and it is committed.
-- Anything expected to take longer than ~10 minutes (generation, training, eval sweeps) runs fully detached: setsid nohup bash -c 'source env.sh && <command>' > $HT_DATA/logs/<job>.log 2>&1 < /dev/null &. Save its PID to $HT_DATA/logs/<job>.pid, stop it by killing its process group, and check progress by reading the log. Never run it as a foreground child of Claude: I work through a Cursor remote session that can disconnect.
 
 ## Layout
 - human_tempo/: one module per pipeline stage
@@ -33,7 +33,7 @@ Phone videos of me putting a bowl on a plate become hundreds of physics-verified
 - Large files live under $HT_DATA, outside the repo.
 
 ## Environment
-- source env.sh first. Python 3.12 venv; versions pinned in requirements.lock.
+- source env.sh first. Python 3.12 venv, built by uv sync from pyproject.toml and uv.lock (scripts/setup.sh).
 - MUJOCO_GL=egl, PYOPENGL_PLATFORM=egl. mujoco==3.3.7 (3.4+ breaks a LIBERO task).
 
 ## Known traps
@@ -51,5 +51,5 @@ Phone videos of me putting a bowl on a plate become hundreds of physics-verified
 - /Data is local NVMe (1 TB), shared with other students and not backed up; files untouched for 180 days are deleted. Push anything worth keeping to the Hugging Face Hub.
 - Home (~) is NFS with a quota of 30 GB and 300k files; on 2026-10-05 about 19 GB and 237k files were used. No venvs, data or caches there; env.sh moves every cache to /Data.
 - Headless EGL verified on 2026-10-05: EGL device 0 gives an OpenGL 4.6 context on the RTX 3090 with no X server. env.sh restricts glvnd to the NVIDIA vendor.
-- ffmpeg: /usr/local/bin/ffmpeg is a static 9.0 build with libx264, libx265, libaom-av1 and NVENC H.264/HEVC, but no libsvtav1 or libdav1d. The system FFmpeg 7.1 libraries (/lib64/libavcodec.so.61) include SVT-AV1 and dav1d. The RTX 3090 cannot encode AV1 in hardware (av1_nvenc fails) but decodes it (av1_cuvid works).
+- ffmpeg: /usr/local/bin/ffmpeg is a static 9.0 build with libx264, libx265, libaom-av1 and NVENC H.264/HEVC, but no libsvtav1 or libdav1d. The system FFmpeg 7.1 libraries (/lib64/libavcodec.so.61) include SVT-AV1 and dav1d but not libavdevice, so torchcodec 0.11.1 cannot load; decode with LeRobot's pyav backend (PyAV 15.1 bundles FFmpeg 7.1 with SVT-AV1 and dav1d). The RTX 3090 cannot encode AV1 in hardware (av1_nvenc fails) but decodes it (av1_cuvid works).
 - Paths, defined in env.sh: code ~/human-tempo; HT_DATA=/Data/yash.bhardwaj/human-tempo; HF_HOME=/Data/yash.bhardwaj/.cache/huggingface; venv /Data/yash.bhardwaj/venvs/human-tempo (UV_PROJECT_ENVIRONMENT, CPython 3.12.10); caches under /Data/yash.bhardwaj/.cache.
