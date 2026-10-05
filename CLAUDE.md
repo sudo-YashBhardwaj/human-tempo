@@ -21,6 +21,7 @@ Phone videos of me putting a bowl on a plate become hundreds of physics-verified
 - Read the relevant existing code first. Extend it; don't duplicate it.
 - For anything non-trivial, state a 3-5 line plan before writing code.
 - Done means: it ran, the output was shown, ruff and pytest pass, NOTES.md has a dated entry, and it is committed.
+- Anything expected to take longer than ~10 minutes (generation, training, eval sweeps) runs fully detached: setsid nohup bash -c 'source env.sh && <command>' > $HT_DATA/logs/<job>.log 2>&1 < /dev/null &. Save its PID to $HT_DATA/logs/<job>.pid, stop it by killing its process group, and check progress by reading the log. Never run it as a foreground child of Claude: I work through a Cursor remote session that can disconnect.
 
 ## Layout
 - human_tempo/: one module per pipeline stage
